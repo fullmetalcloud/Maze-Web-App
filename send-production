@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# build client file
+cd client
+npm run build
+cd ..
+
+# copy client files to production
+cp -r /Users/stormregalia/Desktop/JobTracker/client/build/. ./production/client/build/
+cp /Users/stormregalia/Desktop/JobTracker/client/init_script_client.sh ./production/client/init_script_client.sh
+cp /Users/stormregalia/Desktop/JobTracker/client/Dockerfile-client ./production/client/Dockerfile-client
+
+# copy Docker files
+cp /Users/stormregalia/Desktop/JobTracker/run-production ./production/run-production
+
+cp /Users/stormregalia/Desktop/JobTracker/Dockerfile-base ./production/Dockerfile-base
+
+cp /Users/stormregalia/Desktop/JobTracker/nginx.conf ./production/nginx.conf
+
+cp /Users/stormregalia/Desktop/JobTracker/docker-compose.yml ./production/docker-compose.yml
+
+# send production folder to server
+scp -r /Users/stormregalia/Desktop/JobTracker/production/ pi@73.83.235.11:~/jobtracker/

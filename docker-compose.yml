@@ -1,0 +1,90 @@
+version: '3'
+
+services:
+
+  nginx:
+    image: nginx
+    restart: always
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == docker1
+      mode: replicated
+      replicas: 3
+    ports:
+      - "8181:8181"
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - clientapp
+
+  clientapp:
+    image: fullmetalcloud/clientapp
+    restart: always
+    build:
+      context: ./client/
+      dockerfile: ./Dockerfile-client
+    networks:
+      - backend
+      - frontend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - dbserver
+
+  dbserver:
+    image: fullmetalcloud/dbserver
+    restart: always
+    networks:
+      - backend
+    ports:
+      - "8383:8383"
+    depends_on:
+      - redis-master
+      - redis-slave
+      - mysql
+
+  redis-master:
+    image: redis:4.0.8
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+  redis-slave:
+    image: redis:4.0.8
+    command: redis-server --slaveof redis-master 6379
+    ports:
+      - "6380:6379"
+    networks:
+      - backend
+    depends_on:
+      - redis-master
+
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - mysql_db:/var/lib/mysql
+    restart: always
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == docker2
+    environment:
+      MYSQL_ROOT_PASSWORD: mypassword
+      MYSQL_DATABASE: webdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: lepassword
+    networks:
+      - backend
+    
+
+volumes:
+  mysql_db:
+
+networks:
+  frontend:
+  backend:

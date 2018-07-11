@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Create Client Build
+cd client
+npm run build
+cd ..
+
+# Run docker-compose to build
+docker-compose down --remove-orphans --rmi local
+docker-compose build
+# docker rmi $(docker images -a|grep "<none>"|awk '$1=="<none>" {print $3}') --force
+
+# Run container
+docker-compose up

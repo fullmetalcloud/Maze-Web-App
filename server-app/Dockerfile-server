@@ -1,0 +1,13 @@
+FROM ubuntu:latest
+
+RUN apt-get update && \
+    apt-get install -y wget curl gnupg && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash && \
+    apt-get install -y nodejs && \
+    npm install redis express --save
+
+WORKDIR /app
+COPY ./server.js server.js
+COPY ./init_script_server.sh init_script_server.sh
+
+CMD ["bash", "./init_script_server.sh"]
